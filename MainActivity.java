@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "Ad was dismissed.");
                         // Don't forget to set the ad reference to null so you
                         // don't show the ad a second time.
-                        rewardedAd = null;
+                        rewardedAd = null; // একবার দেখানোর পর auto null হয়ে যায় 
                         tvdisplay.append("\n Ad was dismissed.");
                     }
 
