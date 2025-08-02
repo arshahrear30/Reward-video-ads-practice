@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         tvdisplay = findViewById(R.id.tvdisplay);
 
 
-
+//1.Initialize the Google Mobile Ads SDK  //102 no line
         new Thread(
                 () -> {
                     // Initialize the Google Mobile Ads SDK on a background thread.
@@ -48,8 +48,12 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .start();
 
-        loadRewardAd();
 
+
+        loadRewardAd(); //4. Initialize নিচে কল করলাম // next 134
+
+
+//8.button OnClickListener করলাম তার ভিতর ad show করালাম
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
+//7. Show the ad // ইউজার যখন পুরো ১০- ২০ সেকেন্ডের একটানা দেখবে তখন এই মেথডটা কল হবে ।  মানে রিওয়ার্ড পাবে।
     private void showRewardedAd(){
 
         if(rewardedAd !=null){
@@ -79,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
                         Log.d(TAG, "User earned the reward.");
-                        // Handle the reward.
                         tvdisplay.append("\n User earned the reward.");
                     }
                 });
@@ -95,11 +98,13 @@ public class MainActivity extends AppCompatActivity {
 
     //-------------------------
 
+
+    //2.Load a rewarded ad object । প্রথমে private void এর মধ্যে loadRewardAd() class ধরলাম
     private void loadRewardAd(){
 
 
 
-
+    //3.Google থেকে copy paste করলাম //next 53line
         RewardedAd.load(
                 this,
                 "ca-app-pub-3940256099942544/5224354917",
@@ -110,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "Ad was loaded.");
                         MainActivity.this.rewardedAd = rewardedAd;
                         tvdisplay.setText("Ad was loaded.");
-                        setRewardedAdCallBack();//+++++++++++++++++++++
+                        setRewardedAdCallBack();//6...+++++++++++++++++++++
                     }
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
@@ -125,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
 
     //=================================================
     private void setRewardedAdCallBack(){
+
+        //5.Set the FullScreenContentCallback // Google থেকে copy paste করলাম //118no line
 
         rewardedAd.setFullScreenContentCallback(
                 new FullScreenContentCallback() {
