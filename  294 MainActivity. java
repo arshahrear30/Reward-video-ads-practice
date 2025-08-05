@@ -1,0 +1,256 @@
+package com.example.reward;
+
+
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+
+
+public class MainActivity extends AppCompatActivity {
+
+
+   Button button;
+   ImageView imageView;
+   RewardedAd rewardedAd;
+   String TAG = "RewardedAd";
+
+
+   @Override
+   protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       EdgeToEdge.enable(this);
+       setContentView(R.layout.activity_main);
+
+
+       button = findViewById(R.id.button);
+       imageView = findViewById(R.id.imageView);
+
+
+
+
+//1.Initialize the Google Mobile Ads SDK  //102 no line
+       new Thread(
+               () -> {
+                   // Initialize the Google Mobile Ads SDK on a background thread.
+                   MobileAds.initialize(this, initializationStatus -> {});
+               })
+               .start();
+
+
+
+
+
+
+       loadRewardAd(); //4. Initialize নিচে কল করলাম // next 134
+//8.button OnClickListener করলাম তার ভিতর ad show করালাম
+       button.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+
+
+               new AlertDialog.Builder(MainActivity.this)
+                       .setTitle("Watch Video and Get Gift")
+                       .setMessage("যদি তুমি একটা ভিডিও অ্যাড দেখো তাহলে তোমাকে গিফট করা হবে")
+                       .setPositiveButton("Watch Video", new DialogInterface.OnClickListener() {
+                           @Override
+                           public void onClick(DialogInterface dialog, int which) {
+                               // This method would be defined elsewhere in the code to show a rewarded video ad.
+                               showRewardedAd();
+                           }
+                       })//9.
+                       .setNegativeButton("No Thanks", new DialogInterface.OnClickListener() {
+                           @Override
+                           public void onClick(DialogInterface dialog, int which) {
+                               // Dismisses the dialog box.
+                               dialog.dismiss();
+                           }
+                       })//10.
+                       .create().show();//11.
+           }
+       });
+
+
+
+
+
+
+       ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+           Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+           v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+           return insets;
+       });
+   }
+
+
+
+
+   //}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+//7. Show the ad // ইউজার যখন পুরো ১০- ২০ সেকেন্ডের একটানা দেখবে তখন এই মেথডটা কল হবে ।  মানে রিওয়ার্ড পাবে।
+   private void showRewardedAd(){
+
+
+       if(rewardedAd !=null){
+
+
+       rewardedAd.show(
+               MainActivity.this,
+               new OnUserEarnedRewardListener() {
+                   @Override
+                   public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                       Log.d(TAG, "User earned the reward.");
+                       imageView.setImageResource(R.drawable.gift); //12..
+
+
+                   }
+               });
+   }else {
+           Log.d(TAG,"The reward ad wasn't ready yet.");
+
+
+
+
+       }
+   }
+
+
+
+
+   //}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+   //-------------------------
+
+
+
+
+   //2.Load a rewarded ad object । প্রথমে private void এর মধ্যে loadRewardAd() class ধরলাম
+   private void loadRewardAd(){
+
+
+
+
+
+
+   //3.Google থেকে copy paste করলাম //next 53line
+       RewardedAd.load(
+               this,
+               "ca-app-pub-3940256099942544/5224354917",
+               new AdRequest.Builder().build(),
+               new RewardedAdLoadCallback() {
+                   @Override
+                   public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                       Log.d(TAG, "Ad was loaded.");
+                       MainActivity.this.rewardedAd = rewardedAd;
+
+
+                       setRewardedAdCallBack();//6...+++++++++++++++++++++
+                   }
+                   @Override
+                   public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                       Log.d(TAG, loadAdError.getMessage());
+                       rewardedAd = null;
+
+
+                   }
+               });
+
+
+   }
+   //------------------------------------------------
+
+
+   //=================================================
+   private void setRewardedAdCallBack(){
+
+
+       //5.Set the FullScreenContentCallback // Google থেকে copy paste করলাম //118no line
+
+
+       rewardedAd.setFullScreenContentCallback(
+               new FullScreenContentCallback() {
+                   @Override
+                   public void onAdDismissedFullScreenContent() {
+                       // Called when fullscreen content is dismissed.
+                       Log.d(TAG, "Ad was dismissed.");
+                       // Don't forget to set the ad reference to null so you
+                       // don't show the ad a second time.
+                       rewardedAd = null; // একবার দেখানোর পর auto null হয়ে যায়
+
+
+                   }
+
+
+                   @Override
+                   public void onAdFailedToShowFullScreenContent(AdError adError) {
+                       // Called when fullscreen content failed to show.
+                       Log.d(TAG, "Ad failed to show.");
+                       // Don't forget to set the ad reference to null so you
+                       // don't show the ad a second time.
+                       rewardedAd = null;
+
+
+                   }
+
+
+                   @Override
+                   public void onAdShowedFullScreenContent() {
+                       // Called when fullscreen content is shown.
+                       Log.d(TAG, "Ad showed fullscreen content.");
+
+
+                   }
+
+
+                   @Override
+                   public void onAdImpression() {
+                       // Called when an impression is recorded for an ad.
+                       Log.d(TAG, "Ad recorded an impression.");
+
+
+                   }
+
+
+                   @Override
+                   public void onAdClicked() {
+                       // Called when an ad is clicked.
+                       Log.d(TAG, "Ad was clicked.");
+
+
+
+
+                   }
+               });
+
+
+   }
+
+
+   //==================================================
+
+
+}
+
